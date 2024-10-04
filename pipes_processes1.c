@@ -62,7 +62,7 @@ int main()
     // child process 
     else
     { 
-        close(fd1[1]);  // Close writing end of first pipes 
+        close(fd1[1]);  //  Close writing end of first pipes 
         close(fd2[1]); 
       
         // Read a string using first pipe 
