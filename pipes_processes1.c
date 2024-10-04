@@ -4,8 +4,15 @@
 #include<unistd.h> 
 #include<sys/types.h> 
 #include<string.h> 
+#include <signal.h>
 #include<sys/wait.h> 
-  
+
+int signalled_main = 0;
+
+void handler() {
+signalled_main = 1;
+}
+
 int main() 
 { 
     /*
@@ -47,24 +54,34 @@ int main()
   
     
     else if (p > 0) { // P1, Parent process  
-        char output_str[100];         
+        char output_str[100];
+        char output_str2[100];         
         close(fd2[1]); // Close writing end of pipe that will be use to read from child process
         close(fd1[0]);  // Close reading end of pipe used to write to child process
         
   
+        // register signal handler for sigint
+        signal(SIGINT,handler);
+
         // Write input string
         write(fd1[1], input_str, strlen(input_str)+1); 
   
         // Wait for child to send a string 
-        wait(NULL); 
+        while(1){
+          if (signalled_main == 1){
+            read(fd2[0], output_str, 100); // read string from P2/child process
+            break;
+          }
+        }
         
-        read(fd2[0], output_str, 100); // read string from P2/child process
+        wait(NULL);
+        read(fd2[0], output_str2, 100); // read string from P2/child process
 
         // concatenate with fixed string
         int k = strlen(output_str);
         int i; 
-        for (i=0; i<strlen(input_str2); i++) 
-            output_str[k++] = input_str2[i]; 
+        for (i=0; i<strlen(output_str2); i++) 
+            output_str[k++] = output_str2[i]; 
         output_str[k] = '\0';   // string ends with '\0' 
 
         // print new string
@@ -94,8 +111,11 @@ int main()
   
         printf("Output: %s\n", concat_str); // print output
         write(fd2[1], concat_str, strlen(concat_str)+1); // write concatenated string to pipe so that P1/parent process can read it 
+        // TODO: send signal here
         printf("Input: ");
-        scanf("%s", input_str); 
+        scanf("%s", input_str2); 
+        input_str2[strlen(input_str2)] = '\0';
+        write(fd2[1], input_str2, strlen(input_str2)+1); // write concatenated string to pipe so that P1/parent process can read it 
 
         // Close remaining open ends of pipes
         close(fd1[0]); 
