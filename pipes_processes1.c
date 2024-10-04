@@ -10,15 +10,18 @@ int main()
 { 
     /*
     to do: read input string in child, pass both input str and concat str to p1, print out
+
+    - write from child, send signal (parent should have signal listener registered)
+    - write from child again, concatenate and print
     */
-    
+
     // We use two pipes  
     int fd1[2];  // file descriptor for first pipe. Used to to send input string from parent 
     int fd2[2];  // file descriptor for second pipe. Used to send concatenated string from child 
   
     char fixed_str[] = "howard.edu"; 
-    char fixed_str2[] = "gobison.org"; 
     char input_str[100]; 
+    char input_str2[100]; 
     pid_t p; 
   
     if (pipe(fd1)==-1) 
@@ -60,8 +63,8 @@ int main()
         // concatenate with fixed string
         int k = strlen(output_str);
         int i; 
-        for (i=0; i<strlen(fixed_str2); i++) 
-            output_str[k++] = fixed_str2[i]; 
+        for (i=0; i<strlen(input_str2); i++) 
+            output_str[k++] = input_str2[i]; 
         output_str[k] = '\0';   // string ends with '\0' 
 
         // print new string
