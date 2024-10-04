@@ -4,22 +4,16 @@
 #include<unistd.h> 
 #include<sys/types.h> 
 #include<string.h> 
-#include <signal.h>
 #include<sys/wait.h> 
 
-int signalled_main = 0;
-
-void handler() {
-signalled_main = 1;
-}
 
 int main() 
 { 
     /*
-    to do: read input string in child, pass both input str and concat str to p1, print out
+    todo: 
+    - ensure you can read text with spaces (scanf can't atm)
+    - read more than once from child process without having to wait(NULL) in main process
 
-    - write from child, send signal (parent should have signal listener registered)
-    - write from child again, concatenate and print
     */
 
     // We use two pipes  
@@ -58,24 +52,14 @@ int main()
         char output_str2[100];         
         close(fd2[1]); // Close writing end of pipe that will be use to read from child process
         close(fd1[0]);  // Close reading end of pipe used to write to child process
-        
-  
-        // register signal handler for sigint
-        signal(SIGINT,handler);
+
 
         // Write input string
         write(fd1[1], input_str, strlen(input_str)+1); 
-  
-        // Wait for child to send a string 
-        // while(1){
-        //   if (signalled_main == 1){
-            
-        //     break;
-        //   }
-        // }
-        read(fd2[0], output_str, 100); // read string from P2/child process
-        wait(NULL);
-        read(fd2[0], output_str2, 100); // read string from P2/child process
+        read(fd2[0], output_str, 100); // read concat string from P2/child process
+        
+        wait(NULL); // wait for child process to end
+        read(fd2[0], output_str2, 100); // read second input string from P2/child process
 
         // concatenate with fixed string
         int k = strlen(output_str);
