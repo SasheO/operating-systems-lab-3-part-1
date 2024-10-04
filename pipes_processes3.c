@@ -15,9 +15,9 @@ int main(int argc, char **argv)
 {
   int pipefd[2];
   int pid;
-
+  
   char *cat_args[] = {"cat", "scores", NULL};
-  char *grep_args[] = {"grep", "Lakers", NULL};
+  char *grep_args[] = {"grep", argv[1], NULL};
 
   // make a pipe (fds go in pipefd[0] and pipefd[1])
 
