@@ -16,6 +16,7 @@ int main()
     int fd2[2];  // Used to store two ends of second pipe 
   
     char fixed_str[] = "howard.edu"; 
+    char fixed_str2[] = "gobison.org"; 
     char input_str[100]; 
     pid_t p; 
   
@@ -30,7 +31,7 @@ int main()
         return 1; 
     } 
   
-    printf("Enter a string to concatenate:");
+    printf("Input: ");
     scanf("%s", input_str); 
     p = fork(); 
   
@@ -43,9 +44,12 @@ int main()
     // Parent process 
     else if (p > 0) 
     { 
-  
+        char output_str[100]; 
+        // idea: don't close reading for fd2 in parent or writing of fd2 in child, use them to pass back the message at the end
+        
+        close(fd2[1]); // Close writing end of pipe that will be use to read from child process
         close(fd1[0]);  // Close reading end of pipes 
-        close(fd2[0]);
+        
   
         // Write input string and close writing end of first 
         // pipe. 
@@ -54,16 +58,24 @@ int main()
   
         // Wait for child to send a string 
         wait(NULL); 
-  
-        close(fd2[1]); // Close writing end of pipes 
-        close(fd1[1]); 
+        read(fd2[0], output_str, 100); 
+        int k = strlen(output_str);
+        int i; 
+        for (i=0; i<strlen(fixed_str2); i++) 
+            output_str[k++] = fixed_str2[i]; 
+   
+        output_str[k] = '\0';   // string ends with '\0' 
+        printf("Output: %s\n", output_str);
+
+        close(fd2[0]); // Close reading end of pipe
+        close(fd1[1]); // Close writing end of pipes 
     } 
   
     // child process 
     else
     { 
-        close(fd1[1]);  //  Close writing end of first pipes 
-        close(fd2[1]); 
+        close(fd1[1]); //  Close writing end of first pipes  
+        close(fd2[0]); 
       
         // Read a string using first pipe 
         char concat_str[100]; 
@@ -77,10 +89,14 @@ int main()
   
         concat_str[k] = '\0';   // string ends with '\0' 
   
-        printf("Concatenated string %s\n", concat_str);
+        printf("Output: %s\n", concat_str);
+
+        write(fd2[1], concat_str, strlen(concat_str)+1); 
+
         // Close both reading ends 
         close(fd1[0]); 
-        close(fd2[0]); 
+        
+        close(fd2[1]); 
 
   
         exit(0); 
