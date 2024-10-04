@@ -67,13 +67,13 @@ int main()
         write(fd1[1], input_str, strlen(input_str)+1); 
   
         // Wait for child to send a string 
-        while(1){
-          if (signalled_main == 1){
-            read(fd2[0], output_str, 100); // read string from P2/child process
-            break;
-          }
-        }
-        
+        // while(1){
+        //   if (signalled_main == 1){
+            
+        //     break;
+        //   }
+        // }
+        read(fd2[0], output_str, 100); // read string from P2/child process
         wait(NULL);
         read(fd2[0], output_str2, 100); // read string from P2/child process
 
@@ -111,7 +111,7 @@ int main()
   
         printf("Output: %s\n", concat_str); // print output
         write(fd2[1], concat_str, strlen(concat_str)+1); // write concatenated string to pipe so that P1/parent process can read it 
-        // TODO: send signal here
+        
         printf("Input: ");
         scanf("%s", input_str2); 
         input_str2[strlen(input_str2)] = '\0';
